@@ -8,7 +8,6 @@
 
 // extern "C" bool RLBOT_CORE_API IsInitialized()
 
-
 int main()
 {
 	LoadRLBot();
@@ -25,6 +24,8 @@ int main()
 	// input.Handbrake = false;
 	UpdatePlayerInput(input, 0);
 
+
+
 	while (1) {
 
 		// Leaks
@@ -37,22 +38,24 @@ int main()
 			auto car = packet.GameCars[i];
 			auto carPosition = car.Physics.Location;
 
-			float y = car.Physics.Rotation.Yaw;
-			float f[] = {  cos(y), -sin(y) };
-			float l[] = {  sin(y),  cos(y) };
+			// Add approximately PI, then the values don't wrap around :)
+			float y = 3.2f + car.Physics.Rotation.Yaw;
 
-			float dx[] = { ballPosition.X - carPosition.X, ballPosition.Y - carPosition.Y };
-
-			float theta = atan2(l[0]*dx[0] + l[1]+dx[1], f[0]*dx[0] + f[1]*dx[1]);
+			float carBallOffset[] = { ballPosition.X - carPosition.X, ballPosition.Y - carPosition.Y };
+			float deltaAngle = 3.2f + atan2(carBallOffset[1], carBallOffset[0]);
 			
 			if (i == 0) {
-				std::cout << theta << "\n";
+				std::cout << "Delta Angle:" << deltaAngle << ", Yaw: " << y << "\n";
+			}
+	
+			if (deltaAngle < y) {
+				input.Steer = -0.5f;
+			}
+			else {
+				input.Steer = 0.5f;
 			}
 
-			input.Steer = fmaxf(fminf(3.0f * theta, 1.0f), -1.0f);
-
 			UpdatePlayerInput(input, i);
-
 		}
 	}
 }
