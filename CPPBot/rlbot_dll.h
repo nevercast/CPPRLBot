@@ -3,6 +3,8 @@
 #include <Windows.h>
 #include "ByteBuffer.h"
 #include "PacketStructs/PacketStructs.hpp"
+#include "flatbuffers/flatbuffers.h"
+#include "FlatbufferTranslator.hpp"
 
 // Could this be done better with templates? I don't know how to use templates, I don't even know what they are.
 #define RLBOT_API(RETURN_TYPE, FUNC_NAME, ...) typedef RETURN_TYPE( __cdecl *RLPROC_##FUNC_NAME) (__VA_ARGS__); RLPROC_##FUNC_NAME FUNC_NAME = nullptr
@@ -16,13 +18,13 @@
 // I don't know why there is a warning here, I'm ignoring it.
 RLBOT_API(bool, IsInitialized);
 RLBOT_API(ByteBuffer, UpdateFieldInfoFlatbuffer);
-RLBOT_API(void, UpdatePlayerInput, PlayerInput playerInput, int playerIndex);
+RLBOT_API(RLBotCoreStatus, UpdatePlayerInputFlatbuffer, void* playerInputFlatBuf, int flatBufSize);
 RLBOT_API(ByteBuffer, UpdateLiveDataPacketFlatbuffer);
 RLBOT_API(void, Free, void *ptr);
 
 
 void LoadRLBot() {
-	auto rlbot_dll = LoadLibrary(TEXT("..\\RLBot_Core_Interface_32.dll")); 
+	auto rlbot_dll = LoadLibrary(TEXT("..\\RLBot_Core_Interface.dll")); 
 	if (!rlbot_dll) {
 		std::cout << "Failed to load RLBot DLL.\n";
 		std::exit(-1);
@@ -31,7 +33,7 @@ void LoadRLBot() {
 		
 		RLBOT_API_LOAD(rlbot_dll, IsInitialized);
 		RLBOT_API_LOAD(rlbot_dll, UpdateFieldInfoFlatbuffer);
-		RLBOT_API_LOAD(rlbot_dll, UpdatePlayerInput); // Use Flatbuffer instead when we understand how to create them and use the Builder.
+		RLBOT_API_LOAD(rlbot_dll, UpdatePlayerInputFlatbuffer);
 		RLBOT_API_LOAD(rlbot_dll, UpdateLiveDataPacketFlatbuffer);
 		RLBOT_API_LOAD(rlbot_dll, Free);
 
@@ -41,4 +43,12 @@ void LoadRLBot() {
 
 void FreeByteBuffer(ByteBuffer buf) {
 	Free(buf.ptr);
+}
+
+void SetPlayerControls(PlayerInput input, int playerIndex) {
+	flatbuffers::FlatBufferBuilder fbBuilder;
+	FlatbufferTranslator::inputStructToFlatbuffer(&fbBuilder, input, playerIndex);
+	auto fbPointer = fbBuilder.GetBufferPointer();
+	auto fbSize = fbBuilder.GetSize();
+	UpdatePlayerInputFlatbuffer(fbPointer, fbSize);
 }

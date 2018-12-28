@@ -26,7 +26,7 @@ int main()
 	PlayerInput input = PlayerInput();
 	input.Throttle = 1;
 	// input.Handbrake = false;
-	UpdatePlayerInput(input, 0);
+	SetPlayerControls(input, 0);
 
 
 	while (1) {
@@ -59,7 +59,7 @@ int main()
 				input.Steer = 0.5f;
 			}
 
-			UpdatePlayerInput(input, i);
+			SetPlayerControls(input, i);
 		}
 	}
 }
