@@ -61,5 +61,6 @@ int main()
 
 			SetPlayerControls(input, i);
 		}
+		DrawText2D();
 	}
 }
