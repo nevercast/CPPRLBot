@@ -4,15 +4,21 @@
 #include "ByteBuffer.h"
 #include "PacketStructs/PacketStructs.hpp"
 
-typedef bool(__cdecl *IS_INITIALIZED)();
-typedef ByteBuffer(__cdecl *UPDATE_FIELD_INFO_FLATBUFFER)();
-typedef void(__cdecl *UPDATE_PLAYER_INPUT)(PlayerInput playerInput, int playerIndex);
-typedef ByteBuffer(__cdecl *UPDATE_LIVE_DATA_PACKET_FLATBUFFER)();
+// Could this be done better with templates? I don't know how to use templates, I don't even know what they are.
+#define RLBOT_API(RETURN_TYPE, FUNC_NAME, ...) typedef RETURN_TYPE( __cdecl *RLPROC_##FUNC_NAME) (__VA_ARGS__); RLPROC_##FUNC_NAME FUNC_NAME = nullptr
+#define RLBOT_API_LOAD(RLBOT_DLL, FUNC_NAME) \
+	FUNC_NAME = (RLPROC_##FUNC_NAME)GetProcAddress(RLBOT_DLL, #FUNC_NAME); \
+	if (!FUNC_NAME) { \
+		std::cout << "Failed to get " << #FUNC_NAME << ", is it even exported?\n"; \
+		std::exit(-2); \
+	}
 
-IS_INITIALIZED IsInitialized = nullptr;
-UPDATE_FIELD_INFO_FLATBUFFER UpdateFieldInfoFlatbuffer = nullptr;
-UPDATE_PLAYER_INPUT UpdatePlayerInput = nullptr;
-UPDATE_LIVE_DATA_PACKET_FLATBUFFER UpdateLiveDataPacketFlatbuffer = nullptr;
+// I don't know why there is a warning here, I'm ignoring it.
+RLBOT_API(bool, IsInitialized);
+RLBOT_API(ByteBuffer, UpdateFieldInfoFlatbuffer);
+RLBOT_API(void, UpdatePlayerInput, PlayerInput playerInput, int playerIndex);
+RLBOT_API(ByteBuffer, UpdateLiveDataPacketFlatbuffer);
+RLBOT_API(void, Free, void *ptr);
 
 
 void LoadRLBot() {
@@ -22,34 +28,17 @@ void LoadRLBot() {
 		std::exit(-1);
 	} else {
 		std::cout << "RLBot DLL: " << rlbot_dll;
-
-		IsInitialized = (IS_INITIALIZED)GetProcAddress(rlbot_dll, "IsInitialized");
-		if (IsInitialized) {
-			auto isInitializeTho = IsInitialized();
-			std::cout << isInitializeTho;
-		}
-		else {
-			std::cout << "Failed to get IsInitialized, is it even exported?\n";
-			std::exit(-2);
-		}
-
-		UpdateFieldInfoFlatbuffer = (UPDATE_FIELD_INFO_FLATBUFFER)GetProcAddress(rlbot_dll, "UpdateFieldInfoFlatbuffer");
-		if (!UpdateFieldInfoFlatbuffer) {
-			std::cout << "Failed to get UpdateFieldInfoFlatbuffer, is it even exported?\n";
-			std::exit(-3);
-		}
-
-		UpdatePlayerInput = (UPDATE_PLAYER_INPUT)GetProcAddress(rlbot_dll, "UpdatePlayerInput");
-		if (!UpdatePlayerInput) {
-			std::cout << "Failed to get UpdatePlayerInput, is it even exported?\n";
-			std::exit(-4);
-		}
-
-		UpdateLiveDataPacketFlatbuffer = (UPDATE_LIVE_DATA_PACKET_FLATBUFFER)GetProcAddress(rlbot_dll, "UpdateLiveDataPacketFlatbuffer");
-		if (!UpdateLiveDataPacketFlatbuffer) {
-			std::cout << "Failed to get UpdateLiveDataPacketFlatbuffer, is it even exported?\n";
-			std::exit(-5);
-		}
 		
+		RLBOT_API_LOAD(rlbot_dll, IsInitialized);
+		RLBOT_API_LOAD(rlbot_dll, UpdateFieldInfoFlatbuffer);
+		RLBOT_API_LOAD(rlbot_dll, UpdatePlayerInput); // Use Flatbuffer instead when we understand how to create them and use the Builder.
+		RLBOT_API_LOAD(rlbot_dll, UpdateLiveDataPacketFlatbuffer);
+		RLBOT_API_LOAD(rlbot_dll, Free);
+
+		// TODO Wait for IsInitialized to be true, and consider timing out.
 	}
+}
+
+void FreeByteBuffer(ByteBuffer buf) {
+	Free(buf.ptr);
 }

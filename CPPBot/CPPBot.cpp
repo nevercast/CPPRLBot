@@ -19,11 +19,12 @@ int main()
 	ByteBuffer buf2 = UpdateLiveDataPacketFlatbuffer();
 	FlatbufferTranslator::translateToStruct(buf2, &packet);
 
+	FreeByteBuffer(buf2);
+
 	PlayerInput input = PlayerInput();
 	input.Throttle = 1;
 	// input.Handbrake = false;
 	UpdatePlayerInput(input, 0);
-
 
 
 	while (1) {
@@ -31,6 +32,7 @@ int main()
 		// Leaks
 		ByteBuffer buf2 = UpdateLiveDataPacketFlatbuffer();
 		FlatbufferTranslator::translateToStruct(buf2, &packet);
+		FreeByteBuffer(buf2);
 
 		auto ballPosition = packet.GameBall.Physics.Location;
 		for (int i = 0; i < packet.NumCars; i++) {
