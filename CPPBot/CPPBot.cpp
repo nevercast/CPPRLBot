@@ -1,12 +1,7 @@
-// CPPBot.cpp : This file contains the 'main' function. Program execution begins and ends there.
-//
-
 #include "rlbot_dll.h"
 #include <iostream>
 #include "rlbot_dll.h"
 #include "FlatbufferTranslator.hpp"
-
-// extern "C" bool RLBOT_CORE_API IsInitialized()
 
 int main()
 {
@@ -25,7 +20,6 @@ int main()
 
 	PlayerInput input = PlayerInput();
 	input.Throttle = 1;
-	// input.Handbrake = false;
 	SetPlayerControls(input, 0);
 
 

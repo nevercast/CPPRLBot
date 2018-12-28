@@ -60,11 +60,8 @@ void SetPlayerControls(PlayerInput input, int playerIndex) {
 
 void DrawText2D() {
 
-	// THIS IS RLBOT
-
 	flatbuffers::FlatBufferBuilder fbBuilder;
-	auto color = rlbot::flat::CreateColor(fbBuilder, 0xFF, 0xFF); // Red
-	// It wants a pointer apparently
+	auto color = rlbot::flat::CreateColor(fbBuilder, 0xFF, 0xFF); 
 	auto vec3 = rlbot::flat::Vector3(0, 0, 0);
 
 	auto renderMessage = rlbot::flat::CreateRenderMessageDirect(fbBuilder,
@@ -74,18 +71,11 @@ void DrawText2D() {
 		false);
 	
 	const std::vector<flatbuffers::Offset<rlbot::flat::RenderMessage>> messages = { renderMessage };
-	auto renderGroup = rlbot::flat::CreateRenderGroupDirect(fbBuilder, &messages); // Uncool C++ stylez
+	auto renderGroup = rlbot::flat::CreateRenderGroupDirect(fbBuilder, &messages); 
 	
 	fbBuilder.Finish(renderGroup); 
 	auto pointer = fbBuilder.GetBufferPointer();
-	auto girth = fbBuilder.GetSize();
+	auto size = fbBuilder.GetSize();
 
-	RenderGroup(pointer, girth);
-
-	// I think its fine
-	// All this shit should be on the stack
-
-	// I think it [Finish] takes the root of the nested packet
-	// I'm confused - so yolo
-
+	RenderGroup(pointer, size);
 }
