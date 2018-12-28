@@ -22,6 +22,7 @@ int main()
 	input.Throttle = 0;
 	SetPlayerControls(input, 0);
 
+	DrawTeapot(rlbot::flat::Vector3(0, 0, 500), 500);
 
 	while (1) {
 
