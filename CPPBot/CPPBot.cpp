@@ -15,6 +15,8 @@ int main()
 	FieldInfo fieldInfoInst;
 	FlatbufferTranslator::translateToFieldInfoStruct(buf, &fieldInfoInst);
 
+	FreeByteBuffer(buf);
+
 	LiveDataPacket packet = LiveDataPacket();
 	ByteBuffer buf2 = UpdateLiveDataPacketFlatbuffer();
 	FlatbufferTranslator::translateToStruct(buf2, &packet);
