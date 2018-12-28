@@ -19,7 +19,7 @@ int main()
 	FreeByteBuffer(buf2);
 
 	PlayerInput input = PlayerInput();
-	input.Throttle = 1;
+	input.Throttle = 0;
 	SetPlayerControls(input, 0);
 
 
@@ -41,10 +41,10 @@ int main()
 
 			float carBallOffset[] = { ballPosition.X - carPosition.X, ballPosition.Y - carPosition.Y };
 			float deltaAngle = 3.2f + atan2(carBallOffset[1], carBallOffset[0]);
-			
+			/*
 			if (i == 0) {
 				std::cout << "Delta Angle:" << deltaAngle << ", Yaw: " << y << "\n";
-			}
+			}*/
 	
 			if (deltaAngle < y) {
 				input.Steer = -0.5f;
@@ -53,8 +53,7 @@ int main()
 				input.Steer = 0.5f;
 			}
 
-			SetPlayerControls(input, i);
+			// SetPlayerControls(input, i);
 		}
-		DrawText2D();
 	}
 }
